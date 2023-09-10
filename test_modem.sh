@@ -32,6 +32,12 @@ enable_adb() {
     errcho "We failed to enable adb"
     return 1
   fi
+	mmcli -m any -s $SMSID --send
+	if [ $? -ne 0 ]; then
+		errcho "We failed to enable adb"
+		return 1
+	fi
+	sleep 60
 }
 
 disable_adb() {
@@ -40,9 +46,14 @@ disable_adb() {
     grep -Eo "SMS/[0-9]+" |
     grep -oE "[0-9]+"
   )"; then
-    errcho "We failed to enable adb"
+    errcho "We failed to disable adb"
     return 1
   fi
+	mmcli -m any -s $SMSID --send
+	if [ $? -ne 0 ]; then
+		errcho "We failed to disable adb"
+		return 1
+	fi
 	sleep 1
 }
 
