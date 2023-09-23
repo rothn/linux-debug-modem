@@ -59,6 +59,8 @@ disable_adb() {
 
 enable_adb
 
+echo "===Battery Voltage (uV)==="
+cat /sys/class/power_supply/rk818-battery/voltage_now
 echo "===Modem State==="
 mmcli -m any --output-keyvalue
 echo "===CALL ATTEMPT==="
