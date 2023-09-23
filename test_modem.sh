@@ -23,43 +23,13 @@ print_call() {
   fi
 }
 
-enable_adb() {
-  if ! SMSID="$(
-    mmcli -m any --messaging-create-sms="text='enable adb',number='+223344556677'" |
-    grep -Eo "SMS/[0-9]+" |
-    grep -oE "[0-9]+"
-  )"; then
-    errcho "We failed to enable adb"
-    return 1
-  fi
-	mmcli -m any -s $SMSID --send
-	if [ $? -ne 0 ]; then
-		errcho "We failed to enable adb"
-		return 1
-	fi
-	sleep 60
-}
+adb devices
 
-disable_adb() {
-  if ! SMSID="$(
-    mmcli -m any --messaging-create-sms="text='disable adb',number='+223344556677'" |
-    grep -Eo "SMS/[0-9]+" |
-    grep -oE "[0-9]+"
-  )"; then
-    errcho "We failed to disable adb"
-    return 1
-  fi
-	mmcli -m any -s $SMSID --send
-	if [ $? -ne 0 ]; then
-		errcho "We failed to disable adb"
-		return 1
-	fi
-	sleep 1
-}
-
-enable_adb
-
-echo "===Battery Voltage (uV)==="
+echo "===BEGIN DIAGNOSE===" > /dev/kmsg
+adb shell 'echo "===BEGIN DIAGNOSE===" > /dev/kmsg'
+echo "===Battery Voltage (uV), for PinePhone and PinePhone Pro==="
+echo "Note: Errors here are normal, and no battery voltage will display at all unless the host uses an axp20x or rk818 charge controller (e.g., PinePhone, PinePhone Pro)"
+cat /sys/class/power_supply/axp20x-battery/voltage_now
 cat /sys/class/power_supply/rk818-battery/voltage_now
 echo "===Modem State==="
 mmcli -m any --output-keyvalue
@@ -69,6 +39,8 @@ START=`date -d "now - 30 minutes" "+%Y-%m-%d %H:%M:%S"`
 CALLID=$(dial_number)
 while sleep 1 && print_call $CALLID :; do :; done
 END=`date "+%Y-%m-%d %H:%M:%S"`
+echo "===END DIAGNOSE===" > /dev/kmsg
+adb shell 'echo "===END DIAGNOSE===" > /dev/kmsg'
 echo "===ModemManager Logs==="
 journalctl -u ModemManager --since="$START" --until="$END"
 echo "===NetworkManager Logs==="
@@ -80,4 +52,4 @@ echo "===Modem dmesg==="
 adb shell 'echo Collecting dmesg... > /dev/kmsg'
 adb shell dmesg
 
-disable_adb
+killall -9 adb
