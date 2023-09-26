@@ -1,3 +1,3 @@
 #!/bin/bash
 
-killalll -9 ModemManager
+killall -9 ModemManager
