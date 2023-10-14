@@ -26,11 +26,13 @@ print_call() {
 adb devices
 
 echo "===BEGIN DIAGNOSE===" > /dev/kmsg
+echo -ne "AT+QVOLTEDBG\r" > /dev/EG25.AT
 adb shell 'echo "===BEGIN DIAGNOSE===" > /dev/kmsg'
 echo "===Battery Voltage (uV), for PinePhone and PinePhone Pro==="
 echo "Note: Errors here are normal, and no battery voltage will display at all unless the host uses an axp20x or rk818 charge controller (e.g., PinePhone, PinePhone Pro)"
 cat /sys/class/power_supply/axp20x-battery/voltage_now
 cat /sys/class/power_supply/rk818-battery/voltage_now
+
 echo "===Modem State==="
 mmcli -m any --output-keyvalue
 echo "===CALL ATTEMPT==="
